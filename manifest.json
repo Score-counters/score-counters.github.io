@@ -1,0 +1,17 @@
+{
+  "name": "Neo Score Tracker",
+  "short_name": "NeoScore",
+  "description": "Aplikasi pencatat skor kartu full count",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0c10",
+  "theme_color": "#0b0c10",
+  "icons": [
+    {
+      "src": "./logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

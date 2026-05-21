@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Counter</title>
+    <!-- Link ke Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0b0c10">
+    <link rel="icon" type="image/png" href="logo.svg">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root{
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --dark-bg: #0b0c10;
+            --card-bg: rgba(31, 40, 51, 0.8);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #c5c6c7;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at top left, #1f2833 0%, transparent 60%);
+            background-attachment: fixed;
+            overflow-y: auto;
+        }
+
+        .glow-title {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .neo-table-container {
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            margin-bottom: 30px;
+        }
+
+        .table {
+            color: #c5c6c7;
+            margin-bottom: 0;
+            table-layout: fixed;
+        }
+
+        .table th, .table td {
+            min-width: 150px;
+            background-color: transparent;
+            border-color: rgba(0, 243, 255, 0.2);
+            padding: 1rem 0.5rem;
+            vertical-align: middle;
+        }
+
+        .table thead th {
+            border-bottom: 2px solid var(--neon-blue);
+            font-size: 1.1rem;
+        }
+
+        .score-display {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 8px var(--neon-purple);
+        }
+
+        .btn-neon {
+            background: rgba(0, 243, 255, 0.05);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            transition: all 0.3s;
+        }
+
+        .btn-neon:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .input-neon {
+            background: rgba(0, 0, 0, 0.5) !important;
+            border: 1px solid rgba(0, 243, 255, 0.5) !important;
+            color: #fff !important;
+        }
+        
+        .input-neon:focus {
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.5) !important;
+            border-color: var(--neon-blue) !important;
+        }
+
+        /* Styling baris Submit Ronde */
+        .submit-row td {
+            border-bottom: 2px solid var(--neon-blue) !important;
+            background: rgba(0, 243, 255, 0.02);
+        }
+
+        .history-cell {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .history-cell:hover {
+            background-color: rgba(255, 215, 0, 0.15);
+        }
+
+        .history-star {
+            color: #ffd700;
+            filter: drop-shadow(0 0 5px #ffd700);
+            margin-left: 5px;
+            animation: pop-in 0.3s ease-out;
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.3); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .table-responsive::-webkit-scrollbar { height: 10px; }
+        .table-responsive::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); border-radius: 5px; }
+        .table-responsive::-webkit-scrollbar-thumb { background: rgba(0, 243, 255, 0.4); border-radius: 5px; }
+    </style>
+</head>
+<body class="py-4">
+
+<div class="container-fluid px-4 pb-5">
+    
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+        <div class="text-start">
+           <div class="d-flex align-items-center gap-3 mb-1">
+                <img src="./logo.svg" alt="NeoScore Logo" style="width: 45px; height: 45px; border-radius: 12px; box-shadow: 0 0 10px rgba(0, 243, 255, 0.4);">
+                <h1 class="glow-title mb-0 fs-3">Score Counter</h1>
+            </div>
+            <p class="text-secondary mb-0" style="font-size: 0.9rem;">
+                <i class="fa-solid fa-circle-info me-1"></i> Klik riwayat poin untuk ⭐ | <span class="text-success"><i class="fa-solid fa-cloud-arrow-up"></i> Saved</span>
+            </p>
+        </div>
+        
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <small id="playerCountLimit" class="text-muted me-2 fw-bold"></small>
+            
+            <button class="btn btn-outline-danger btn-sm px-3" onclick="removePlayer()" title="Kurangi Pemain">
+                <i class="fa-solid fa-user-minus"></i>
+            </button>
+            <button id="addPlayerBtn" class="btn btn-neon btn-sm px-3" onclick="addPlayer()">
+                <i class="fa-solid fa-user-plus me-1"></i> Tambah
+            </button>
+            <button class="btn btn-outline-warning btn-sm px-3 ms-2" onclick="resetAllScores()">
+                <i class="fa-solid fa-rotate-right me-1"></i> Reset
+            </button>
+            <button id="installAppBtn" class="btn btn-info btn-sm px-3 fw-bold ms-2" style="display: none;">
+                <i class="fa-solid fa-download me-1"></i> Install
+            </button>
+        </div>
+    </div>
+
+    <div class="neo-table-container">
+        <div class="table-responsive">
+            <table class="table text-center align-middle">
+                <thead id="tableHeader"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // --- PWA & SERVICE WORKER LOGIC ---
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .catch(err => console.log('Service Worker Error', err));
+        });
+    }
+
+    let deferredPrompt;
+    const installBtn = document.getElementById('installAppBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'inline-block';
+    });
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
+    });
+
+    // --- GAME LOGIC ---
+    let players = [];
+    const minPlayers = 2; 
+    const maxPlayers = 20;
+    let nextPlayerId = 1;
+    const STORAGE_KEY = 'Score-Counter';
+
+    function init() {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            players = parsedData.players;
+            nextPlayerId = parsedData.nextPlayerId;
+        } else {
+            for (let i = 0; i < 5; i++) createPlayerObject();
+        }
+        render();
+    }
+
+    function saveData() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, nextPlayerId }));
+    }
+
+    function createPlayerObject() {
+        players.push({ id: nextPlayerId, name: `Pemain ${nextPlayerId}`, score: 0, history: [] });
+        nextPlayerId++;
+    }
+
+    function addPlayer() {
+        if (players.length < maxPlayers) { createPlayerObject(); render(); }
+    }
+
+    function removePlayer() {
+        if (players.length > minPlayers) {
+            if(confirm("Yakin ingin menghapus pemain terakhir?")) { players.pop(); render(); }
+        }
+    }
+
+    // --- FUNGSI BARU: SUBMIT RONDE ---
+    function submitRound() {
+        let anyInput = false;
+
+        // Cek dulu apakah minimal ada satu kotak yang diisi
+        players.forEach(p => {
+            const val = document.getElementById(`input-score-${p.id}`).value;
+            if (val !== '') anyInput = true;
+        });
+
+        // Kalau tidak ada yang diisi sama sekali, batalkan (hindari salah klik)
+        if (!anyInput) return;
+
+        // Proses semua pemain
+        players.forEach(p => {
+            const inputElement = document.getElementById(`input-score-${p.id}`);
+            let scoreToAdd = parseInt(inputElement.value);
+            
+            // Jika kosong/tidak valid, otomatis jadikan 0
+            if (isNaN(scoreToAdd)) {
+                scoreToAdd = 0;
+            }
+
+            p.score += scoreToAdd;
+            p.history.push({ point: scoreToAdd, star: false }); 
+            inputElement.value = ''; // Kosongkan form
+        });
+        
+        render();
+    }
+
+    function handleKeyPress(event) { 
+        if (event.key === 'Enter') submitRound(); 
+    }
+
+    function toggleStar(playerId, historyIndex) {
+        const playerIndex = players.findIndex(p => p.id === playerId);
+        if (playerIndex !== -1 && players[playerIndex].history[historyIndex]) {
+            players[playerIndex].history[historyIndex].star = !players[playerIndex].history[historyIndex].star;
+            render();
+        }
+    }
+
+    function resetAllScores() {
+        if(confirm("Yakin ingin mereset semua skor?")) {
+            players.forEach(p => { p.score = 0; p.history = []; });
+            render();
+        }
+    }
+
+    function editName(id) {
+        const playerIndex = players.findIndex(p => p.id === id);
+        const newName = prompt("Nama pemain:", players[playerIndex].name);
+        if (newName && newName.trim() !== "") { players[playerIndex].name = newName.trim(); render(); }
+    }
+
+    function render() {
+        const thead = document.getElementById('tableHeader');
+        const tbody = document.getElementById('tableBody');
+        const limitText = document.getElementById('playerCountLimit');
+        const addBtn = document.getElementById('addPlayerBtn');
+
+        // 1. Header (Nama)
+        let headerHTML = '<tr>';
+        players.forEach(player => {
+            headerHTML += `<th><div class="d-flex justify-content-center align-items-center gap-2">
+            <span class="text-truncate fw-bold" style="max-width: 110px;">${player.name}</span>
+            <button class="btn btn-sm btn-link text-secondary p-0" onclick="editName(${player.id})"><i class="fa-solid fa-pen-to-square"></i></button></div></th>`;
+        });
+        headerHTML += '</tr>';
+        thead.innerHTML = headerHTML;
+
+        // 2. Skor Total
+        let bodyHTML = '<tr>';
+        players.forEach(player => { bodyHTML += `<td><div class="score-display">${player.score}</div></td>`; });
+        bodyHTML += '</tr>';
+        
+        // 3. Kolom Input Saja (Tanpa tombol + individual)
+        bodyHTML += '<tr>';
+        players.forEach(player => {
+            bodyHTML += `<td class="pb-3"><input type="number" id="input-score-${player.id}" class="form-control input-neon text-center mx-auto" style="max-width: 100px;" placeholder="Poin" onkeypress="handleKeyPress(event)"></td>`;
+        });
+        bodyHTML += '</tr>';
+
+        // 4. Baris Tombol Submit Global
+        bodyHTML += '<tr class="submit-row">';
+        bodyHTML += `<td colspan="${players.length}" class="pt-2 pb-4">
+            <button class="btn btn-neon px-5 py-2 fw-bold" onclick="submitRound()">
+                <i class="fa-solid fa-check-double me-2"></i> Simpan Poin Ronde Ini
+            </button>
+        </td>`;
+        bodyHTML += '</tr>';
+
+        // 5. Riwayat Ke Bawah
+        const maxHistoryLength = Math.max(...players.map(p => p.history.length), 0);
+        if (maxHistoryLength > 0) {
+            for (let i = 0; i < maxHistoryLength; i++) {
+                bodyHTML += '<tr>';
+                players.forEach(player => {
+                    const hData = player.history[i];
+                    if (hData !== undefined) {
+                        const {point, star} = hData;
+                        // Kalau poin 0, warnanya akan redup (text-secondary)
+                        let pointClass = point > 0 ? "text-success fw-bold fs-5" : (point < 0 ? "text-danger fw-bold fs-5" : "text-secondary fs-5");
+                        const starIcon = star ? '<i class="fa-solid fa-star history-star"></i>' : '';
+                        
+                        bodyHTML += `<td class="history-cell border-bottom border-secondary border-opacity-25 py-2" onclick="toggleStar(${player.id}, ${i})"><span class="${pointClass}">${point > 0 ? '+' : ''}${point}</span>${starIcon}</td>`;
+                    }
+                });
+                bodyHTML += '</tr>';
+            }
+        }
+
+        tbody.innerHTML = bodyHTML;
+        limitText.innerText = `${players.length}/${maxPlayers} Pemain`;
+        addBtn.disabled = players.length >= maxPlayers;
+        saveData();
+    }
+
+    init();
+</script>
+ 
+</body>
+</html>
